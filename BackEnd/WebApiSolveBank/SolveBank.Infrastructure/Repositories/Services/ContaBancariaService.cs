@@ -1,38 +1,64 @@
-﻿using SolveBank.Entities.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using SolveBank.Entities.Enums;
+using SolveBank.Entities.Models;
+using SolveBank.Infrastructure.Configuration;
 using SolveBank.Infrastructure.Repositories.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SolveBank.Infrastructure.Repositories.Services
 {
     public class ContaBancariaService : IContaBancariaRepository
     {
-        public Task<ContaBancaria> AtualizarConta(ContaBancaria contaBancaria)
+        private readonly SolveBankDbConfig _solveBankDbConfig;
+
+        public ContaBancariaService(SolveBankDbConfig solveBankDbConfig)
         {
-            throw new NotImplementedException();
+            _solveBankDbConfig = solveBankDbConfig;
         }
 
-        public Task<decimal> ConsultarSaldo(Guid contaBancariaID)
+        public async Task<ContaBancaria?> AtualizarConta(ContaBancaria contaBancaria)
         {
-            throw new NotImplementedException();
+            try{
+                _solveBankDbConfig.ContasBancarias.Update(contaBancaria);
+                await _solveBankDbConfig.SaveChangesAsync();
+                return contaBancaria;
+            }catch{
+                return null;
+            }
+            
         }
 
-        public Task<ContaBancaria> CriarConta(ContaBancaria contaBancaria)
+        public async Task<decimal?> ConsultarSaldo(Guid contaBancariaID)
         {
-            throw new NotImplementedException();
+            ContaBancaria contaBancaria = await _solveBankDbConfig.ContasBancarias.FindAsync(contaBancariaID);
+            if (contaBancaria == null){
+                return null;
+            }
+            return contaBancaria.Saldo;
         }
 
-        public Task<bool> DesativarAtivarConta(Guid contaBancariaID)
+        public async Task<ContaBancaria> CriarConta(ContaBancaria contaBancaria)
         {
-            throw new NotImplementedException();
+            var contaCriada = await _solveBankDbConfig.ContasBancarias.AddAsync(contaBancaria);
+            await _solveBankDbConfig.SaveChangesAsync();
+            return contaCriada.Entity;
         }
 
-        public Task<ContaBancaria> ExibirDadosConta(Guid contaBancariaID)
+        public async Task<bool> DesativarAtivarConta(Guid contaBancariaID)
         {
-            throw new NotImplementedException();
+            var contaBancaria = await _solveBankDbConfig.ContasBancarias.FindAsync(contaBancariaID);
+            if (contaBancaria == null)
+                return false;
+            contaBancaria.Removido = true;
+            _solveBankDbConfig.ContasBancarias.Update(contaBancaria);
+            await _solveBankDbConfig.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<ContaBancaria> ExibirDadosConta(Guid contaBancariaID)
+        {
+            var contaBancaria = await _solveBankDbConfig.ContasBancarias.FindAsync(contaBancariaID);
+            return contaBancaria;
         }
     }
 }
