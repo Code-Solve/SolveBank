@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolveBank.Entities.Models;
+using SolveBank.Entities.DTOs.TransacoesDTOs.Saque;
 using SolveBank.Infrastructure.Repositories.Contracts;
 
 namespace WebApiSolveBank.Controllers
@@ -22,8 +23,9 @@ namespace WebApiSolveBank.Controllers
         }
 
         [HttpPut("sacar/{contaId}")]
-        public async Task<IActionResult> RealizarSaque(Guid contaId, [FromBody] decimal valorSaque)
+        public async Task<IActionResult> RealizarSaque(Guid contaId, [FromBody] SaqueDTO saqueDTO)
         {
+            var valorSaque = saqueDTO.ValorSaque;
             var contaBancaria = await _contaBancariaRepository.ExibirDadosConta(contaId);
             var saldoDisponivel = contaBancaria.Saldo + contaBancaria.Limite - contaBancaria.LimiteUtilizado;
             if (contaBancaria.Saldo >= valorSaque)
