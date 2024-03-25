@@ -84,7 +84,7 @@ export class SignUpComponent implements OnInit {
     const password = this.signUpForm.get('senha')?.value;
     const confirmPassword = this.signUpForm.get('confirmarSenha')?.value;
     if (password === confirmPassword) return true;
-    return false;
+    else return false;
   }
 
   get passwordValidation() {
